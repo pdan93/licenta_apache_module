@@ -1,0 +1,16 @@
+array(3) {
+  ["id"]=>
+  string(1) "1"
+  ["user"]=>
+  string(6) "daniel"
+  ["pass"]=>
+  string(5) "dan23"
+}
+array(3) {
+  ["id"]=>
+  string(1) "2"
+  ["user"]=>
+  string(6) "raluca"
+  ["pass"]=>
+  string(5) "ral23"
+}

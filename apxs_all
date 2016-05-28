@@ -1,0 +1,5 @@
+#!/bin/bash
+apxs -c -I/usr/include/mysql -lmysqlclient mod_helloworld.c
+apxs -i mod_helloworld.la
+service apache2 restart
+
