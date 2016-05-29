@@ -12,117 +12,123 @@ FILE * content_file;
 FILE * content_file2;
 int content_file_ok = 0;
 int content_file_ok2 = 0;
+FILE * printtable_file;
+FILE * complete_file_log;
 
-static void log_request(request_rec *r) {
-	FILE * f;
-    f = fopen ("/licenta/request.txt","w");
-    if (f!=NULL)
+static int printitem(void* rec, const char* key, const char* value) { //MODIFIED FROM APACHE MODULES BOOK 131
+  /* rec is a userdata pointer.  We'll pass the request_rec in it */
+  request_rec* r = rec ;
+  fprintf(printtable_file, "%s: %s\n", ap_escape_html(r->pool, key), ap_escape_html(r->pool, value)) ;
+  /* Zero would stop iterating; any other return value continues */
+  return 1 ;
+}
+static void printtable(request_rec* r, apr_table_t* t, FILE * file) {//MODIFIED FROM APACHE MODULES BOOK 131
+  /* Print the data: apr_table_do iterates over entries with our callback */
+  printtable_file = file;
+  apr_table_do(printitem, r, t, NULL) ;
+}
+
+static void complete_log_request(request_rec *r) {
+	
+    complete_file_log = fopen ("/licenta/request.txt","w");
+    if (complete_file_log!=NULL)
         {
-		fprintf(f, "Request protocol: %s\n",r->protocol);
-		fprintf(f, "Request hostname: %s\n",r->hostname);
-		fprintf(f, "Request status_line: %s\n",r->status_line);
-		fprintf(f, "Request method: %s\n",r->method);
-		fprintf(f, "Request range: %s\n",r->range);
-		fprintf(f, "Request content_type: %s\n",r->content_type);
-		fprintf(f, "Request handler: %s\n",r->handler);
-		fprintf(f, "Request content_encoding: %s\n",r->content_encoding);
-		fprintf(f, "Request user: %s\n",r->user);
-		fprintf(f, "Request ap_auth_type: %s\n",r->ap_auth_type);
-		fprintf(f, "Request unparsed_uri: %s\n",r->unparsed_uri);
-		fprintf(f, "Request uri: %s\n",r->uri);
-		fprintf(f, "Request filename: %s\n",r->filename);
-		fprintf(f, "Request canonical_filename: %s\n",r->canonical_filename);
-		fprintf(f, "Request path_info: %s\n",r->path_info);
-		fprintf(f, "Request args: %s\n",r->args);
-		fprintf(f, "Request log_id: %s\n",r->log_id);
-		fprintf(f, "Request useragent_ip: %s\n",r->useragent_ip);
-		fprintf(f, "Request time (time when request started): %d\n",r->request_time);
-		fprintf(f, "Request allowed(y/n): %d\n",r->allowed);
-		fprintf(f, "Request resource last modified time: %d\n",r->mtime);
+		fprintf(complete_file_log, "Request protocol: %s\n",r->protocol);
+		fprintf(complete_file_log, "Request hostname: %s\n",r->hostname);
+		fprintf(complete_file_log, "Request status_line: %s\n",r->status_line);
+		fprintf(complete_file_log, "Request method: %s\n",r->method);
+		fprintf(complete_file_log, "Request range: %s\n",r->range);
+		fprintf(complete_file_log, "Request content_type: %s\n",r->content_type);
+		fprintf(complete_file_log, "Request handler: %s\n",r->handler);
+		fprintf(complete_file_log, "Request content_encoding: %s\n",r->content_encoding);
+		fprintf(complete_file_log, "Request user: %s\n",r->user);
+		fprintf(complete_file_log, "Request ap_auth_type: %s\n",r->ap_auth_type);
+		fprintf(complete_file_log, "Request unparsed_uri: %s\n",r->unparsed_uri);
+		fprintf(complete_file_log, "Request uri: %s\n",r->uri);
+		fprintf(complete_file_log, "Request filename: %s\n",r->filename);
+		fprintf(complete_file_log, "Request canonical_filename: %s\n",r->canonical_filename);
+		fprintf(complete_file_log, "Request path_info: %s\n",r->path_info);
+		fprintf(complete_file_log, "Request args: %s\n",r->args);
+		fprintf(complete_file_log, "Request log_id: %s\n",r->log_id);
+		fprintf(complete_file_log, "Request useragent_ip: %s\n",r->useragent_ip);
+		fprintf(complete_file_log, "Request time (time when request started): %d\n",r->request_time);
+		fprintf(complete_file_log, "Request allowed(y/n): %d\n",r->allowed);
+		fprintf(complete_file_log, "Request resource last modified time: %d\n",r->mtime);
 		
 		
 			
 			apr_sockaddr_t* useragent_addr= r->useragent_addr;
-			fprintf(f, "\tRequest UseragentAddr hostname: %s\n",useragent_addr->hostname);
-			fprintf(f, "\tRequest UseragentAddr servname: %s\n",useragent_addr->servname);
-			fprintf(f, "\tRequest UseragentAddr port: %d\n",useragent_addr->port);
-			fprintf(f, "\tRequest UseragentAddr ipaddr_len: %d\n",useragent_addr->ipaddr_len);
-			fprintf(f, "\tRequest UseragentAddr addr_str_len: %d\n",useragent_addr->addr_str_len);
-			fprintf(f, "\tRequest UseragentAddr family: %d\n",useragent_addr->family);
-			//fprintf(f, "\tRequest UseragentAddr ip: %s\n",useragent_addr->next->hostname);
+			fprintf(complete_file_log, "\tRequest UseragentAddr hostname: %s\n",useragent_addr->hostname);
+			fprintf(complete_file_log, "\tRequest UseragentAddr servname: %s\n",useragent_addr->servname);
+			fprintf(complete_file_log, "\tRequest UseragentAddr port: %d\n",useragent_addr->port);
+			fprintf(complete_file_log, "\tRequest UseragentAddr ipaddr_len: %d\n",useragent_addr->ipaddr_len);
+			fprintf(complete_file_log, "\tRequest UseragentAddr addr_str_len: %d\n",useragent_addr->addr_str_len);
+			fprintf(complete_file_log, "\tRequest UseragentAddr family: %d\n",useragent_addr->family);
+			//fprintf(complete_file_log, "\tRequest UseragentAddr ip: %s\n",useragent_addr->next->hostname);
 			
-			apr_uri_t parsed_uri = r->parsed_uri;
-			fprintf(f, "\tRequest ParsedURI scheme: %s\n",parsed_uri->user);
+			
+		conn_rec* connection= r->connection;
+		fprintf(complete_file_log, "Connection client_ip: %s\n",connection->client_ip);
+		fprintf(complete_file_log, "Connection remote_host: %s\n",connection->remote_host);
+		fprintf(complete_file_log, "Connection remote_logname: %s\n",connection->remote_logname);
+		fprintf(complete_file_log, "Connection local_ip: %s\n",connection->local_ip);
+		fprintf(complete_file_log, "Connection local_host: %s\n",connection->local_host);
+		fprintf(complete_file_log, "Connection log_id: %s\n",connection->log_id);
 		
-		//fprintf(f, "Requesr useragent_host: %s\n",r->useragent_host);
+		apr_sockaddr_t * client_addr = connection->client_addr;
+			fprintf(complete_file_log, "\tConnection ClientAddr hostname: %s\n",client_addr->hostname);
+			fprintf(complete_file_log, "\tConnection ClientAddr servname: %s\n",client_addr->servname);
+			fprintf(complete_file_log, "\tConnection ClientAddr port: %d\n",client_addr->port);
+			fprintf(complete_file_log, "\tConnection ClientAddr ipaddr_len: %d\n",client_addr->ipaddr_len);
+			fprintf(complete_file_log, "\tConnection ClientAddr addr_str_len: %d\n",client_addr->addr_str_len);
+			fprintf(complete_file_log, "\tConnection ClientAddr family: %d\n",client_addr->family);
+			
+		if (client_addr->next)
+			{
+			char * ip_addr;
+			apr_sockaddr_ip_get(&ip_addr, client_addr->next);
+			fprintf(complete_file_log, "\tConnection ClientAddr id_addr: %s\n",ip_addr);
+			}
+		
+		/*char * ip_addr;
+		apr_sockaddr_ip_get(&ip_addr, client_addr);
+			fprintf(complete_file_log, "\tConnection ClientAddr id_addr: %s\n",ip_addr);*/
+			
+			//apr_uri_t parsed_uri = r->parsed_uri;
+			//fprintf(complete_file_log, "\tRequest ParsedURI scheme: %s\n",parsed_uri->user);
+		
+		//fprintf(complete_file_log, "Requesr useragent_host: %s\n",r->useragent_host);
 			server_rec * server= r->server;
-			fprintf(f, "\tServer defn_name: %s\n",server->defn_name);
-			fprintf(f, "\tServer server_scheme: %s\n",server->server_scheme);
-			fprintf(f, "\tServer server_admin: %s\n",server->server_admin);
-			fprintf(f, "\tServer server_hostname: %s\n",server->server_hostname);
-			fprintf(f, "\tServer path: %s\n",server->path);
+			fprintf(complete_file_log, "\n");
+			fprintf(complete_file_log, "Server defn_name: %s\n",server->defn_name);
+			fprintf(complete_file_log, "Server server_scheme: %s\n",server->server_scheme);
+			fprintf(complete_file_log, "Server server_admin: %s\n",server->server_admin);
+			fprintf(complete_file_log, "Server server_hostname: %s\n",server->server_hostname);
+			fprintf(complete_file_log, "Server path: %s\n",server->path);
 			process_rec * process= server->process;
-			fprintf(f, "\t\tServer Process short_name: %s\n",process->short_name);
-			fprintf(f, "\t\tServer Process argv: %s\n",process->argv);
+			fprintf(complete_file_log, "\tServer Process short_name: %s\n",process->short_name);
+			fprintf(complete_file_log, "\tServer Process argv: %s\n",process->argv);
 			//apr_file_t * error_log= server->error_log;
-			//fprintf(f, "\t\tServer ErrorLog fname: %s\n",error_log->fname);
+			//fprintf(complete_file_log, "\t\tServer ErrorLog fname: %s\n",error_log->fname);
 			apr_port_t * port= server->port;
-			fprintf(f, "\tServer Port: %d\n",port);
-			fprintf(f, "\tServer Timeout(ms): %d\n",server->timeout);
-			fprintf(f, "\tServer Keep Alive Timeout(ms): %d\n",server->keep_alive_timeout);
-			fprintf(f, "\tServer Keep Alive Max: %d\n",server->keep_alive_max);
-			fprintf(f, "\tServer Keep Alive(yes/no): %d\n",server->keep_alive);
-			fprintf(f, "\tServer limit on size of the HTTP request line: %d\n",server->limit_req_line);
-			fprintf(f, "\tServer limit on size of any request header field: %d\n",server->limit_req_fieldsize);
-			fprintf(f, "\tServer limit on number of request header fields: %d\n",server->limit_req_fields);
+			fprintf(complete_file_log, "Server Port: %d\n",port);
+			fprintf(complete_file_log, "Server Timeout(ms): %d\n",server->timeout);
+			fprintf(complete_file_log, "Server Keep Alive Timeout(ms): %d\n",server->keep_alive_timeout);
+			fprintf(complete_file_log, "Server Keep Alive Max: %d\n",server->keep_alive_max);
+			fprintf(complete_file_log, "Server Keep Alive(yes/no): %d\n",server->keep_alive);
+			fprintf(complete_file_log, "Server limit on size of the HTTP request line: %d\n",server->limit_req_line);
+			fprintf(complete_file_log, "Server limit on size of any request header field: %d\n",server->limit_req_fieldsize);
+			fprintf(complete_file_log, "Server limit on number of request header fields: %d\n",server->limit_req_fields);
 		
+		fprintf(complete_file_log,"\nHEADERS IN\n");
+		printtable(r,r->headers_in,complete_file_log);
+		//fprintf(complete_file_log,"\nHEADERS OUT\n");
+		//printtable(r,r->headers_out,complete_file_log);
 			
-		/*
-        fputs("Protocol: ", f);
-        fputs(r->protocol, f);
-        fputs("\nThe Request: ", f);
-        fputs(r->the_request, f);
-        fputs("\nHostname: ", f);
-        fputs(r->hostname, f);
-        //fputs("\nStatus Line: ", f);
-        //fputs(r->status_line, f);
-        fputs("\nMethod: ", f);
-        fputs(r->method, f);
-        //fputs("\nRange: ", f);
-        //fputs(r->range, f);
-        fputs("\nCOntent Type: ", f);
-        fputs(r->content_type, f);
-        fputs("\nHandler: ", f);
-        fputs(r->handler, f);
-        //fputs("\nContent encoding: ", f);
-        //fputs(r->content_encoding, f);
-        //fputs("\n Vlist Validator: ", f);
-        //fputs(r->vlist_validator, f);
-        //fputs("\n User: ", f);
-        //fputs(r->user, f);
-        //fputs("\n Ap Auth Type: ", f);
-        //fputs(r->ap_auth_type, f);
-        fputs("\n Unparsed Uri: ", f);
-        fputs(r->unparsed_uri, f);
-        fputs("\n Uri: ", f);
-        fputs(r->uri, f);
-        fputs("\n Filename: ", f);
-        fputs(r->filename, f);
-        fputs("\n Canonical Filename: ", f);
-        fputs(r->canonical_filename, f);
-        fputs("\n Path info: ", f);
-        fputs(r->path_info, f);
-        //fputs("\n Args: ", f);
-        //fputs(r->args, f);
-        //fputs("\n Log Id: ", f);
-        //fputs(r->log_id, f);
-        fputs("\n UserAgent IP: ", f);
-        fputs(r->useragent_ip, f);
-        */
+		
         
         
         
-        fclose(f);
         }
         
 }
@@ -359,6 +365,8 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 			
 			write_brigade(bb_out,r,"y"); 
 			APR_BRIGADE_INSERT_TAIL(bb_out,apr_bucket_eos_create(c->bucket_alloc)); 
+			
+			fclose(complete_file_log);
 			}
 			else 
 			{
@@ -401,10 +409,11 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 
 
 static int input_filter_init(ap_filter_t* f) {
-	log_request(f->r);
+	complete_log_request(f->r);
 	
-	content_file2 = fopen ("/licenta/input_filter.txt","a+");
-	fprintf(content_file2,"Start3\n");
+	//content_file2 = fopen ("/licenta/input_filter.txt","a+");
+	//fprintf(content_file2,"Start3\n");
+	fprintf(complete_file_log,"\nRequest Body\n");
 	content_file_ok2 = 0;
 
 	return OK ;
@@ -421,24 +430,21 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 		char* buf ;
 		size_t bytes ;
 		if ( APR_BUCKET_IS_EOS(b) ) {
-			if (content_file_ok2==0)
+			/*if (complete_file_log!=-1)
 				{
-				fprintf(content_file2,"IN3\n");
-				fclose(content_file2);
-				content_file_ok2=1;
-				}
+				fprintf(complete_file_log,"IN3\n");
+				//fclose(complete_file_log);
+				//complete_file_log = -1;
+				}*/
 			}
 			else 
 			{
 			apr_bucket_read(b, &buf, &bytes, APR_BLOCK_READ);
 			buf[bytes]=0;
-			if (content_file_ok2==1)
-				{
-				content_file2 = fopen ("/licenta/input_filter.txt","a+");
-				content_file_ok2 = 0;
-				}
-				
-			fprintf(content_file2,"%s\n",buf);
+			
+			char *	buf2 = apr_punescape_url(f->r->pool,buf);
+			fprintf(complete_file_log,"%s\n",buf);
+			fprintf(complete_file_log,"%s\n",buf2);
 			}
 		}
 	return rv;
