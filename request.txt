@@ -1,0 +1,42 @@
+Request protocol: HTTP/1.1
+Request hostname: 46.101.111.249
+Request status_line: (null)
+Request method: GET
+Request range: (null)
+Request content_type: (null)
+Request handler: application/x-httpd-php
+Request content_encoding: (null)
+Request user: (null)
+Request ap_auth_type: (null)
+Request unparsed_uri: /web/test.php
+Request uri: /web/test.php
+Request filename: /var/www/html/web/test.php
+Request canonical_filename: /var/www/html/web/test.php
+Request path_info: 
+Request args: (null)
+Request log_id: (null)
+Request useragent_ip: 89.136.122.93
+Request time (time when request started): 1670394155
+Request allowed(y/n): 0
+Request resource last modified time: 0
+	Request UseragentAddr hostname: (null)
+	Request UseragentAddr servname: (null)
+	Request UseragentAddr port: 54599
+	Request UseragentAddr ipaddr_len: 16
+	Request UseragentAddr addr_str_len: 46
+	Request UseragentAddr family: 10
+	Server defn_name: /etc/apache2/sites-enabled/000-default.conf
+	Server server_scheme: (null)
+	Server server_admin: webmaster@localhost
+	Server server_hostname: 127.0.1.1
+	Server path: (null)
+		Server Process short_name: apache2
+		Server Process argv: º¾Ì£ý
+	Server Port: 80
+	Server Timeout(ms): 300000000
+	Server Keep Alive Timeout(ms): 5000000
+	Server Keep Alive Max: 100
+	Server Keep Alive(yes/no): 1
+	Server limit on size of the HTTP request line: 8190
+	Server limit on size of any request header field: 8190
+	Server limit on number of request header fields: 100
