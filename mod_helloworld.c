@@ -205,47 +205,47 @@ static int test_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 	
 	char *data = "hey";
 	char *data2 = "heyend";
+	
+        
 	for ( b = APR_BRIGADE_FIRST(bb_in); b != APR_BRIGADE_SENTINEL(bb_in); b = APR_BUCKET_NEXT(b) ) 
 		{
 		const char* buf ;
 		size_t bytes ;
 		if ( APR_BUCKET_IS_EOS(b) ) {
-			/*APR_BUCKET_INSERT_BEFORE(b, apr_bucket_pool_create( 
-			   data2, 
-			   strlen(data2), 
-			   f->r->pool, 
-			   f->r->connection->bucket_alloc 
-			));*/
+			
 			}
 			else 
 			{
 			apr_bucket_read(b, &buf, &bytes, APR_BLOCK_READ);
-			char * pch;
+			//log_bucket(b);
+			if (strstr(r->the_request,".php"))					
+				log_text("here2");
+			/*char * pch;
 			pch = strstr(buf,"daniel");
 			int len = pch-buf;
 			
-			char content[1000];
+			char content[10000];
 			content[0]=0;
 			
 			strncat(content,buf,len);
 			strcat(content,"DANIEL");
 			strcat(content,pch+6);
 			
+			
+			
 			write_brigade(bb_out,r,content); 
+			*/
 			
-			ok=1;
+			write_brigade(bb_out,r,buf);
+			
+			ok=0;
 			
 			
-			/*APR_BUCKET_INSERT_BEFORE(b, apr_bucket_pool_create(
-				data,
-				strlen(data),
-				f->r->pool,
-				f->r->connection->bucket_alloc
-			));*/
 			}
 		}
 	APR_BRIGADE_INSERT_TAIL(bb_out,apr_bucket_eos_create(c->bucket_alloc)); 
 	ap_remove_output_filter(f); 
+	
  
 	if (ok==0)
 		return ap_pass_brigade(f->next, bb_in) ;
