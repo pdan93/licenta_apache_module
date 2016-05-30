@@ -9,7 +9,7 @@ void read_in_buffer(char * filepath, char ** buffer ) {
   long lSize = ftell (content_file2);
   rewind (content_file2);
 
-  // allocate memory to contain the whole file:
+  /// allocate memory to contain the whole file:
   *buffer = (char*) malloc (sizeof(char)*lSize);
   if (buffer == NULL) {fputs ("Memory error",stderr); exit (2);}
 
