@@ -1,27 +1,27 @@
 Request protocol: HTTP/1.1
 Request hostname: 46.101.111.249
 Request status_line: (null)
-Request method: POST
+Request method: GET
 Request range: (null)
-Request content_type: (null)
-Request handler: application/x-httpd-php
+Request content_type: image/png
+Request handler: (null)
 Request content_encoding: (null)
 Request user: (null)
 Request ap_auth_type: (null)
-Request unparsed_uri: /web/test.php
-Request uri: /web/test.php
-Request filename: /var/www/html/web/test.php
-Request canonical_filename: /var/www/html/web/test.php
+Request unparsed_uri: /web/images/favicon.png
+Request uri: /web/images/favicon.png
+Request filename: /var/www/html/web/images/favicon.png
+Request canonical_filename: /var/www/html/web/images/favicon.png
 Request path_info: 
 Request args: (null)
 Request log_id: (null)
 Request useragent_ip: 89.136.122.93
-Request time (time when request started): 440895439
+Request time (time when request started): -548580796
 Request allowed(y/n): 0
 Request resource last modified time: 0
 	Request UseragentAddr hostname: (null)
 	Request UseragentAddr servname: (null)
-	Request UseragentAddr port: 56169
+	Request UseragentAddr port: 65485
 	Request UseragentAddr ipaddr_len: 16
 	Request UseragentAddr addr_str_len: 46
 	Request UseragentAddr family: 10
@@ -33,7 +33,7 @@ Connection local_host: (null)
 Connection log_id: (null)
 	Connection ClientAddr hostname: (null)
 	Connection ClientAddr servname: (null)
-	Connection ClientAddr port: 56169
+	Connection ClientAddr port: 65485
 	Connection ClientAddr ipaddr_len: 16
 	Connection ClientAddr addr_str_len: 46
 	Connection ClientAddr family: 10
@@ -44,7 +44,7 @@ Server server_admin: webmaster@localhost
 Server server_hostname: 127.0.1.1
 Server path: (null)
 	Server Process short_name: apache2
-	Server Process argv: º”þ
+	Server Process argv: º¾‘Úÿ
 Server Port: 80
 Server Timeout(ms): 300000000
 Server Keep Alive Timeout(ms): 5000000
@@ -57,17 +57,11 @@ Server limit on number of request header fields: 100
 HEADERS IN
 Host: 46.101.111.249
 Connection: keep-alive
-Content-Length: 35
-Cache-Control: max-age=0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Origin: null
-Upgrade-Insecure-Requests: 1
+Pragma: no-cache
+Cache-Control: no-cache
 User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36
-Content-Type: application/x-www-form-urlencoded
-Accept-Encoding: gzip, deflate
+Accept: */*
+Referer: http://46.101.111.249/web/signup.php
+Accept-Encoding: gzip, deflate, sdch
 Accept-Language: en-US,en;q=0.8,fr;q=0.6,ro;q=0.4
 Cookie: PHPSESSID=5q1j8d2gq16hdrdgt7b9m1ier0
-
-Request Body
-testing=testing&sdasd=%27+AND+1%3D1
-(null)
