@@ -7,6 +7,7 @@
 #include <my_global.h>
 #include <mysql.h>
 #include <regex.h>
+#include <time.h>
 
 
 FILE * content_file;
@@ -230,6 +231,20 @@ int categorize_attack(request_rec* r) {
 				clonedb(r);
 				}
 			}
+			else
+			{
+			struct post_body pb = break_post_body(input_buffer);
+			int ok_user_email=0,ok_pass=0;
+			for (int i=0; i<pb.nr; i++)
+				{
+				if (strcmp(pb.keys[i],"email")==0)
+					ok_user_email=1;
+				if (strcmp(pb.keys[i],"username")==0)
+					ok_user_email=1;
+				if (strcmp(pb.keys[i],"password")==0)
+					ok_pass=1;
+				}
+			}
 		}
 	
 				
@@ -266,7 +281,7 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 			size_t bytes ;
 			if ( APR_BUCKET_IS_EOS(b) ) {
 				categorize_attack(f->r);
-				input_has_work=0;
+				input_has_work=-1;
 				}
 				else 
 				{

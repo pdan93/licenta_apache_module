@@ -27,7 +27,20 @@ static void mysql_log(request_rec *r) {
 	}
 	char query[50000];
 	query[0]=0;
-	strcat(query,"INSERT INTO `logs`(`id`, `r_protocol`, `r_hostname`, `r_status_line`, `r_method`, `r_range`, `r_content_type`, `r_handler`, `r_content_encoding`, `r_user`, `r_ap_auth_type`, `r_unparsed_uri`, `r_uri`, `r_filename`, `r_canonical_filename`, `r_path_info`, `r_args`, `r_log_id`, `r_useragent_ip`, `r_request_time`, `r_allowed`, `r_mtime`, `r_UA_hostname`, `r_UA_servname`, `r_UA_port`, `r_UA_ipaddr_len`, `r_UA_addr_str_len`, `r_UA_family`, `c_client_ip`, `c_remote_host`, `c_remote_logname`, `c_local_ip`, `c_local_host`, `c_log_id`, `c_CA_hostname`, `c_CA_servname`, `c_CA_port`, `c_CA_ipaddr_len`, `c_CA_addr_str_len`, `c_CA_family`, `s_defn_name`, `s_server_scheme`, `s_server_admin`, `s_server_hostname`, `s_path`, `s_P_short_name`, `s_P_argv`, `s_port`, `s_timeout`, `s_keep_alive_timeout`, `s_keep_alive_max`, `s_keep_alive`, `s_limit_req_line`, `s_limit_req_fieldsize`, `s_limit_req_fields`, `headers_in`, `headers_out`, `request_body`) VALUES (NULL,");
+	strcat(query,"INSERT INTO `logs`(`id`, `is_attack`, `attack_type`, `specific_attack_type`, `timestamp`, `r_protocol`, `r_hostname`, `r_status_line`, `r_method`, `r_range`, `r_content_type`, `r_handler`, `r_content_encoding`, `r_user`, `r_ap_auth_type`, `r_unparsed_uri`, `r_uri`, `r_filename`, `r_canonical_filename`, `r_path_info`, `r_args`, `r_log_id`, `r_useragent_ip`, `r_request_time`, `r_allowed`, `r_mtime`, `r_UA_hostname`, `r_UA_servname`, `r_UA_port`, `r_UA_ipaddr_len`, `r_UA_addr_str_len`, `r_UA_family`, `c_client_ip`, `c_remote_host`, `c_remote_logname`, `c_local_ip`, `c_local_host`, `c_log_id`, `c_CA_hostname`, `c_CA_servname`, `c_CA_port`, `c_CA_ipaddr_len`, `c_CA_addr_str_len`, `c_CA_family`, `s_defn_name`, `s_server_scheme`, `s_server_admin`, `s_server_hostname`, `s_path`, `s_P_short_name`, `s_P_argv`, `s_port`, `s_timeout`, `s_keep_alive_timeout`, `s_keep_alive_max`, `s_keep_alive`, `s_limit_req_line`, `s_limit_req_fieldsize`, `s_limit_req_fields`, `headers_in`, `headers_out`, `request_body`, `user_post`, `pass_post`) VALUES (NULL,");
+	
+	if (AttackType>0)
+		sprintf(query + strlen(query),"%d,",1);
+		else
+		sprintf(query + strlen(query),"%d,",0);
+	
+	sprintf(query + strlen(query),"%d,",AttackType);
+	sprintf(query + strlen(query),"%d,",SpecificAttackType);
+	time_t rawtime;
+	struct tm * timeinfo;
+	time ( &rawtime );
+	timeinfo = localtime ( &rawtime );
+	sprintf(query + strlen(query),"'%d-%d-%d %d:%d:%d',", timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 	
 	escape_and_add(conn,query,r->protocol,1);
 	escape_and_add(conn,query,r->hostname,1);
@@ -105,10 +118,31 @@ static void mysql_log(request_rec *r) {
 	printtable(r,r->headers_out,headers_out);
 	escape_and_add(conn,query,headers_in,1);//headers_in
 	escape_and_add(conn,query,headers_out,1);//headers_out`
-	if (input_has_work)//request body if any
-		escape_and_add(conn,query,input_buffer,0);
+	if (input_has_work!=0)//request body if any
+		{
+		escape_and_add(conn,query,input_buffer,1);
+		struct post_body pb = break_post_body(input_buffer);
+		char user_email[255],pass[255];
+		user_email[0]=0;pass[0]=0;
+		for (int i=0; i<pb.nr; i++)
+			{
+			if (strcmp(pb.keys[i],"email")==0)
+				strcat(user_email,pb.values[i]);
+			if (strcmp(pb.keys[i],"username")==0)
+				strcat(user_email,pb.values[i]);
+			if (strcmp(pb.keys[i],"password")==0)
+				strcat(pass,pb.values[i]);
+			}
+		escape_and_add(conn,query,user_email,1);
+		escape_and_add(conn,query,pass,0);
+		
+		}
 		else
+		{
+		escape_and_add(conn,query,"",1);
+		escape_and_add(conn,query,"",1);
 		escape_and_add(conn,query,"",0);
+		}
 	
 	sprintf(query + strlen(query),");");
 	
