@@ -244,6 +244,7 @@ int categorize_attack(request_rec* r) {
 				if (strcmp(pb.keys[i],"password")==0)
 					ok_pass=1;
 				}
+			
 			}
 		}
 	
