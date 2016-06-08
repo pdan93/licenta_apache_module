@@ -1,6 +1,6 @@
 char *Module_SQL_server = "localhost";
-char *Module_SQL_user = "honeypot";
-char *Module_SQL_password = "honeypot123"; /* set me first */
+char *Module_SQL_user = "root";
+char *Module_SQL_password = "Dan230793"; /* set me first */
 char *Module_SQL_database = "honeypot";
 
 escape_and_add(MYSQL *conn,char * query,char * whattoadd,int comma) {
@@ -115,9 +115,77 @@ static void mysql_log(request_rec *r) {
 	
 	if (mysql_query(conn, query)) {
 	  //printf("%s\n", mysql_error(conn));
+	  //log_text(mysql_error(conn));
+	  //exit(1);
+	}
+	/*
+	// send SQL query 
+	if (mysql_query(conn, "show tables")) {
+	  printf("%s\n", mysql_error(conn));
+	  exit(1);
+	}
+	res = mysql_use_result(conn);
+	// output table name 
+	printf("MySQL Tables in mysql database:\n");
+	while ((row = mysql_fetch_row(res)) != NULL)
+	  printf("%s \n", row[0]);
+	// close connection 
+	mysql_free_result(res);*/
+	mysql_close(conn);
+}
+
+void clonedb(request_rec *r) {
+	MYSQL *conn;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	
+	conn = mysql_init(NULL);
+	/* Connect to database */
+	if (!mysql_real_connect(conn, Module_SQL_server,
+		 Module_SQL_user, Module_SQL_password, Module_SQL_database, 0, NULL, 0)) {
+	  //printf("%s\n", mysql_error(conn));
+	  exit(1);
+	}
+	
+	int last_sql_clone_nr;
+	FILE * last_sql = fopen("/licenta/last_sql_clone.txt","r");
+	fscanf(last_sql,"%d",&last_sql_clone_nr);
+	fclose(last_sql);
+	last_sql_clone_nr++;
+	
+	char query[50000];
+	query[0]=0;
+	sprintf(query + strlen(query),"CREATE DATABASE elixir_fashion%d",last_sql_clone_nr);
+	if (mysql_query(conn, query)) {
+	  //printf("%s\n", mysql_error(conn));
 	  log_text(mysql_error(conn));
 	  //exit(1);
 	}
+	query[0]=0;
+	sprintf(query + strlen(query),"GRANT ALL PRIVILEGES ON elixir_fashion%d.* To 'test%duser'@'localhost' IDENTIFIED BY 'test%dpass';",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
+	if (mysql_query(conn, query)) {
+	  //printf("%s\n", mysql_error(conn));
+	  log_text(mysql_error(conn));
+	  //exit(1);
+	}
+	
+	query[0]=0;
+	sprintf(query + strlen(query),"mysqldump -h localhost -u root -p'Dan230793' elixir_fashion | mysql -h localhost -u test%duser -p'test%dpass' elixir_fashion%d",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
+	system(query);
+	//log_text(query);
+	
+	
+	last_sql = fopen("/licenta/last_sql_clone.txt","w");
+	fprintf(last_sql,"%d\n",last_sql_clone_nr);
+	fclose(last_sql);
+	last_sql = fopen("/var/www/ip_map","a+");
+	fprintf(last_sql,"%s %d\n",r->useragent_ip,last_sql_clone_nr);
+	fclose(last_sql);
+	hasOwnDb = 1;
+	OwnDbNr[0]=0;
+	sprintf(OwnDbNr,"%d",last_sql_clone_nr);
+
+	/*
 	/*
 	// send SQL query 
 	if (mysql_query(conn, "show tables")) {

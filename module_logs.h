@@ -135,3 +135,14 @@ static void log_text(char *s) {
         }
         
 }
+
+static void log_nr(long long int nr) {
+	FILE * f;
+    f = fopen ("/licenta/text.txt","w");
+    if (f!=NULL)
+        {
+        fprintf(f,"%d\n",nr);
+        fclose(f);
+        }
+        
+}

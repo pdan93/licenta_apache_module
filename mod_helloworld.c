@@ -17,6 +17,8 @@ char * input_buffer;
 int sql_logged = 0;
 int AttackType = 0;
 int SpecificAttackType = 0;
+int hasOwnDb = 0;
+char * OwnDbNr[5];
 
 #include "module_helpers.h"
 #include "module_logs.h"
@@ -104,14 +106,8 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 				if (AttackType==1)//sql inj
 					{
 					
-					if (SpecificAttackType==1)
+					if (SpecificAttackType>2)
 						write_brigade(bb_out,r,"HTTP/1.1 500 Internal Server Error");
-						else
-					if (SpecificAttackType==2)
-						{
-						buf = replace_from_till("message\">","</",buf,"Password incorrect");
-						write_brigade(bb_out,r,buf); 
-						}
 						else
 						write_brigade(bb_out,r,buf); 
 					}
@@ -191,6 +187,22 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 }	
 
 int attack_listen(ap_filter_t* f) {
+	char ip_map_line[100];
+	FILE * ip_map = fopen("/var/www/ip_map","r");
+	while (fgets(ip_map_line, 100, ip_map) != NULL) {
+		if (strstr(ip_map_line,f->r->useragent_ip)!=NULL)
+			{
+			hasOwnDb=1;
+			OwnDbNr[0]=0;
+			strcat(OwnDbNr,ip_map_line+strlen(f->r->useragent_ip)+1);
+			break;
+			}
+			
+	}
+	fclose(ip_map);
+	//log_nr(hasOwnDb);
+	log_text(OwnDbNr);
+	
 	int ok=0;
 	if (my_regex("(POST|PUT|DELETE)",f->r->method))
 		ok=1;
@@ -213,7 +225,10 @@ int categorize_attack(request_rec* r) {
 			
 			struct post_body pb = break_post_body(input_buffer);
 			SpecificAttackType = categorize_sql_injection(pb.values[0]);
-			
+			if (SpecificAttackType>0 && hasOwnDb==0)
+				{
+				clonedb(r);
+				}
 			}
 		}
 	
