@@ -2,20 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
-
-#include <time.h>
+#include "config.h"
+#include "ldns/ldns.h"
 
 int main() {
 	
 	
-  time_t rawtime;
-  struct tm * timeinfo;
-
-  time ( &rawtime );
-  timeinfo = localtime ( &rawtime );
-  //printf ( "Current local time and date: %s", asctime (timeinfo) );
-  printf("%d-%d-%d %d:%d:%d", timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-	
+  ldns_resolver *res;
+        ldns_rdf *domain;
+        ldns_pkt *p;
+        ldns_rr_list *mx;
+        ldns_status s;
+	domain = ldns_dname_new_frm_str("wjrkudvgxlao.93.122.136.89.dnsbl.httpbl.org");
+	 s = ldns_resolver_new_frm_file(&res, NULL);
+//wjrkudvgxlao.93.122.136.89.dnsbl.httpbl.org
 	//system("mysqldump -h localhost -u root -p'Dan230793' test | mysql -h localhost -u test3user -p'test3pass' elixir_fashion3");
 	/*
 	regex_t regex;

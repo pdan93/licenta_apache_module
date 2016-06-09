@@ -168,6 +168,131 @@ static void mysql_log(request_rec *r) {
 	mysql_close(conn);
 }
 
+int get_last_guessings(request_rec *r) {
+	MYSQL *conn;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	
+	conn = mysql_init(NULL);
+	/* Connect to database */
+	if (!mysql_real_connect(conn, Module_SQL_server,
+		 Module_SQL_user, Module_SQL_password, Module_SQL_database, 0, NULL, 0)) {
+	  //printf("%s\n", mysql_error(conn));
+	  exit(1);
+	}
+	char query[50000];
+	query[0]=0;
+	int count=0;
+	//SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='89.136.122.93' AND timestamp>'2016-06-09 00:38:55'
+	strcat(query,"SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='");
+	sprintf(query + strlen(query),"%s' AND timestamp>'",r->useragent_ip);
+	time_t rawtime;
+	struct tm * timeinfo;
+	time ( &rawtime );
+	rawtime -= 60*5;//last 5 minutes
+	timeinfo = localtime ( &rawtime );
+	sprintf(query + strlen(query),"%d-%d-%d %d:%d:%d'", timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+		
+	
+	if (mysql_query(conn, query)) {
+		  //printf("%s\n", mysql_error(conn));
+		  //exit(1);
+		}
+		else
+		{
+		res = mysql_use_result(conn);
+		// output table name 
+		
+		while ((row = mysql_fetch_row(res)) != NULL)
+			{
+			count = atoi(row[0]);
+			}
+		  //printf("%s \n", row[0]);
+	  
+		// close connection 
+		mysql_free_result(res);
+		}
+	mysql_close(conn);
+	return count;
+}
+
+
+int verify_ip(request_rec *r) {
+	MYSQL *conn;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	
+	conn = mysql_init(NULL);
+	/* Connect to database */
+	if (!mysql_real_connect(conn, Module_SQL_server,
+		 Module_SQL_user, Module_SQL_password, Module_SQL_database, 0, NULL, 0)) {
+	  //printf("%s\n", mysql_error(conn));
+	  exit(1);
+	}
+	char query[50000];
+	query[0]=0;
+	int count=0;
+	//SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='89.136.122.93' AND timestamp>'2016-06-09 00:38:55'
+	strcat(query,"SELECT COUNT(*) as 'count' FROM `ips` WHERE ip='");
+	sprintf(query + strlen(query),"%s'",r->useragent_ip);
+	
+	
+	if (mysql_query(conn, query)) {
+		  //printf("%s\n", mysql_error(conn));
+		  //exit(1);
+		}
+		else
+		{
+		res = mysql_use_result(conn);
+		// output table name 
+		
+		while ((row = mysql_fetch_row(res)) != NULL)
+			{
+			count = atoi(row[0]);
+			}
+		  //printf("%s \n", row[0]);
+	  
+		// close connection 
+		mysql_free_result(res);
+		}
+	if (count==0)//ip doesn't exist and we have to call dnsverifier
+		{
+		char buf[1000];
+		FILE *fp;
+		char path[1035];
+		char command[1000];
+		command[0]=0;
+		strcat(command,"php -f /licenta/dnsverify.php -- '");
+		sprintf(command + strlen(command),"%s'",r->useragent_ip);
+
+		/* Open the command for reading. */
+		fp = popen(command, "r");
+		if (fp == NULL) {
+		exit(1);
+		}
+		buf[0]=0;
+		int threat = 0;
+		fscanf(fp,"%s",&buf);
+		fscanf(fp,"%d",&threat);
+		
+		/* close */
+		pclose(fp);
+		
+		//WE NOW SAVE THE IP DATA
+		query[0]=0;
+		strcat(query,"INSERT INTO ips (`id`,`ip`,`threat`,`type`) VALUES (NULL,");
+		escape_and_add(conn,query,r->useragent_ip,1);
+		sprintf(query + strlen(query),"%d,",threat);
+		escape_and_add(conn,query,buf,0);
+		
+		sprintf(query + strlen(query),");");
+		mysql_query(conn, query);
+		
+		}
+	mysql_close(conn);
+	return count;
+}
+
 void clonedb(request_rec *r) {
 	MYSQL *conn;
 	MYSQL_RES *res;

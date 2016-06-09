@@ -20,13 +20,14 @@ int AttackType = 0;
 int SpecificAttackType = 0;
 int hasOwnDb = 0;
 char * OwnDbNr[5];
+int StopHim = 0;
 
 #include "module_helpers.h"
 #include "module_logs.h"
 #include "module_sql.h"
 
 
-
+//project honeypot access key wjrkudvgxlao
 
 static int helloworld_handler(request_rec *r) {
     /*if (!r->handler || strcmp(r->handler, "helloworld")) {
@@ -202,7 +203,8 @@ int attack_listen(ap_filter_t* f) {
 	}
 	fclose(ip_map);
 	//log_nr(hasOwnDb);
-	log_text(OwnDbNr);
+	//verify_ip(f->r);
+		
 	
 	int ok=0;
 	if (my_regex("(POST|PUT|DELETE)",f->r->method))
@@ -244,8 +246,29 @@ int categorize_attack(request_rec* r) {
 				if (strcmp(pb.keys[i],"password")==0)
 					ok_pass=1;
 				}
-			
+			if (ok_user_email==1 || ok_pass==1)
+				{
+				int count = get_last_guessings(r);
+				log_nr(count);
+				if (count>2)
+					{
+					AttackType = 2;//brute force guessing
+					if (ok_user_email==1 && ok_pass==1)
+						SpecificAttackType = 3;
+						else if (ok_user_email==1)
+							SpecificAttackType = 1;
+							else
+							SpecificAttackType = 2;
+					if (count>100)
+						StopHim=1;
+					}
+				}
+			//SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='89.136.122.93' AND timestamp>'2016-06-09 00:38:55'
 			}
+		}
+	if (AttackType>0)
+		{
+		verify_ip(r);
 		}
 	
 				
@@ -283,6 +306,11 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 			if ( APR_BUCKET_IS_EOS(b) ) {
 				categorize_attack(f->r);
 				input_has_work=-1;
+				if (StopHim==1)
+					{
+					mysql_log(f->r);
+					exit(0);
+					}
 				}
 				else 
 				{
