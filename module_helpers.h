@@ -21,7 +21,7 @@ static void printtable(request_rec* r, apr_table_t* t, char * file) {//MODIFIED 
 }
 
 
-void read_in_buffer(char * filepath, char ** buffer ) {
+void read_in_buffer(char * filepath, char ** buffer, request_rec * r ) {
 	FILE * content_file2;
 	content_file2 = fopen (filepath,"r");
 	
@@ -30,7 +30,7 @@ void read_in_buffer(char * filepath, char ** buffer ) {
   rewind (content_file2);
 
   // allocate memory to contain the whole file:
-  *buffer = (char*) malloc (sizeof(char)*lSize);
+  *buffer = (char*) apr_pcalloc(r->pool,sizeof(char)*lSize);
   if (buffer == NULL) {fputs ("Memory error",stderr); exit (2);}
 
   // copy the file into the buffer:
@@ -45,7 +45,7 @@ int strpos(char *haystack, char *needle)
    return -1;
 }
 
-char *str_replace(char *orig, char *rep, char *with) {
+char *str_replace(char *orig, char *rep, char *with, request_rec * r) {
     char *result; // the return string
     char *ins;    // the next insert point
     char *tmp;    // varies
@@ -74,7 +74,7 @@ char *str_replace(char *orig, char *rep, char *with) {
     //    tmp points to the end of the result string
     //    ins points to the next occurrence of rep in orig
     //    orig points to the remainder of orig after "end of rep"
-    tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+    tmp = result = apr_pcalloc(r->pool,strlen(orig) + (len_with - len_rep) * count + 1);
 
     if (!result)
         return NULL;
@@ -91,7 +91,7 @@ char *str_replace(char *orig, char *rep, char *with) {
     return result;
 }
 
-char * replace_from_till(char * from, char * till, char * text, char * with) {
+char * replace_from_till(char * from, char * till, char * text, char * with, request_rec* r) {
 	char *result; // the return string
 	int pos_from = strpos(text,from);
 	pos_from += strlen(from);
@@ -100,7 +100,7 @@ char * replace_from_till(char * from, char * till, char * text, char * with) {
 	printf("%d\n",pos_to);
 	//char * search = (char*) malloc (sizeof(char)*(pos_to-pos_from));
 	//strncat(search,text+pos_from,(pos_to-pos_from));
-	result = (char*) malloc (sizeof(char)*(strlen(text)-(pos_to-pos_from)+strlen(with)));
+	result = (char*) apr_pcalloc(r->pool,sizeof(char)*(strlen(text)-(pos_to-pos_from)+strlen(with)));
 	strncat(result,text,pos_from);
 	strcat(result,with);
 	strcat(result,text+pos_to);
@@ -155,10 +155,10 @@ int my_regex(char * b1, char * b2) {
 		return 0;
 }
 
-char *urlDecode(const char *str) {
+char *urlDecode(const char *str, request_rec* r) {
   int d = 0; /* whether or not the string is decoded */
 
-  char *dStr = malloc(strlen(str) + 1);
+  char *dStr = apr_pcalloc(r->pool,strlen(str) + 1);
   char eStr[] = "00"; /* for a hex code */
 
   strcpy(dStr, str);

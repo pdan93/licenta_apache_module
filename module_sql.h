@@ -14,6 +14,10 @@ escape_and_add(MYSQL *conn,char * query,char * whattoadd,int comma) {
 }
 
 static void mysql_log(request_rec *r) {
+	
+	if (my_regex("honeyadmin",r->uri))
+		return;
+	
 	MYSQL *conn;
 	MYSQL_RES *res;
 	MYSQL_ROW row;
@@ -148,8 +152,9 @@ static void mysql_log(request_rec *r) {
 	
 	
 	if (mysql_query(conn, query)) {
+		
 	  //printf("%s\n", mysql_error(conn));
-	  //log_text(mysql_error(conn));
+	  log_text(mysql_error(conn));
 	  //exit(1);
 	}
 	/*
@@ -321,7 +326,7 @@ void clonedb(request_rec *r) {
 	  //exit(1);
 	}
 	query[0]=0;
-	sprintf(query + strlen(query),"GRANT ALL PRIVILEGES ON elixir_fashion%d.* To 'test%duser'@'localhost' IDENTIFIED BY 'test%dpass';",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
+	sprintf(query + strlen(query),"GRANT ALL PRIVILEGES ON elixir_fashion%d.* To 'elixir_fashion%duser'@'localhost' IDENTIFIED BY 'test%dpass';",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
 	if (mysql_query(conn, query)) {
 	  //printf("%s\n", mysql_error(conn));
 	  log_text(mysql_error(conn));
@@ -329,7 +334,7 @@ void clonedb(request_rec *r) {
 	}
 	
 	query[0]=0;
-	sprintf(query + strlen(query),"mysqldump -h localhost -u root -p'Dan230793' elixir_fashion | mysql -h localhost -u test%duser -p'test%dpass' elixir_fashion%d",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
+	sprintf(query + strlen(query),"mysqldump -h localhost -u root -p'Honey230793' elixir_fashion | mysql -h localhost -u elixir_fashion%duser -p'test%dpass' elixir_fashion%d",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
 	system(query);
 	//log_text(query);
 	

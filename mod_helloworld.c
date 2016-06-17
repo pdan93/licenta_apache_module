@@ -51,6 +51,8 @@ static int helloworld_handler(request_rec *r) {
 }
 
 
+
+
 static int output_filter_init(ap_filter_t* f) {
 	
 	if (output_has_work==1)
@@ -101,7 +103,7 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 				//ap_add_output_filter("last_filter",)
 				
 				
-				read_in_buffer("/licenta/output_filter.txt",&buf);
+				read_in_buffer("/licenta/output_filter.txt",&buf,f->r);
 				
 				//buf = str_replace(buf,"99","yy");
 				
@@ -219,7 +221,7 @@ int attack_listen(ap_filter_t* f) {
 }
 
 int categorize_attack(request_rec* r) {
-	input_buffer = urlDecode(input_buffer);
+	input_buffer = urlDecode(input_buffer,r);
 	if (strlen(input_buffer)>0)
 		{
 		if (my_regex("(.*')|(.*OR.*=)|(;)|(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT(\s+INTO){0,1}|MERGE|SELECT|UPDATE|UNION(\s+ALL){0,1})",input_buffer))
@@ -277,6 +279,8 @@ int categorize_attack(request_rec* r) {
 static int input_filter_init(ap_filter_t* f) {
 	attack_listen(f);
 		
+	//f->r->filename = apr_pcalloc(f->r->pool,sizeof(char)*100);
+	//strcat(f->r->filename,"/var/www/html/test2.php");
 		
 	
 	return OK ;
@@ -293,8 +297,8 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 		apr_brigade_length(bb,1,&bb_length);//get size of input body so that we can malloc it
 		if (input_buffer==-1)
 			{
-			input_buffer = (char*) malloc (sizeof(char)*bb_length);
-			input_buffer[0]=0;
+			input_buffer = apr_pcalloc(f->r->pool,sizeof(char)*bb_length);// malloc (sizeof(char)*bb_length);
+			//input_buffer[0]=0;
 			}
 			
 		apr_bucket* b ;
@@ -329,6 +333,8 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 static void helloworld_hooks(apr_pool_t *pool) {
     //ap_hook_handler(helloworld_handler, NULL, NULL, APR_HOOK_LAST);ap_hook_translate_name
 	//ap_register_output_filter("helloworld", last_filter, NULL, AP_FTYPE_RESOURCE) ;
+	//ap_hook_translate_name(translate_name_handler, NULL, NULL, APR_HOOK_MIDDLE);
+	//ap_hook_post_read_request(post_config_handler, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("helloworld", output_filter, output_filter_init, AP_FTYPE_RESOURCE);
 	ap_register_input_filter("elixir_output_filter", input_filter, input_filter_init, AP_FTYPE_CONTENT_SET);//AP_FTYPE_CONNECTION);
 }
