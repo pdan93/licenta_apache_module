@@ -190,6 +190,8 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 		}
 }	
 
+
+
 int attack_listen(ap_filter_t* f) {
 	char ip_map_line[100];
 	FILE * ip_map = fopen("/var/www/ip_map","r");
@@ -213,6 +215,27 @@ int attack_listen(ap_filter_t* f) {
 	int ok=0;
 	if (my_regex("(POST|PUT|DELETE)",f->r->method))
 		ok=1;
+	
+	if (AttackType==0)
+		{
+		struct MCookie setcookie = get_last_set_cookie(f->r);
+		if (setcookie.key!=NULL)
+			{
+			char headers_in[10000]; 
+			printtable(f->r,f->r->headers_in,headers_in);
+			if (my_regex(setcookie.key,headers_in))
+				{
+				char * cookie_val = apr_pcalloc(f->r->pool, sizeof(char)*(strlen(setcookie.key)+strlen(setcookie.value)+1));
+				sprintf(cookie_val,"%s=%s",setcookie.key,setcookie.value);
+				if (!my_regex(cookie_val,headers_in)) //we have a changed cookie
+					{
+					AttackType = 3;
+					SpecificAttackType = 1;
+					ok=1;
+					}
+				}
+			}
+		}
 	if (ok==1)
 		{
 		input_has_work = 1;
@@ -235,22 +258,42 @@ void changefilepath(request_rec* r) {
 	char * correct_filename = apr_pcalloc(r->pool,sizeof(char)*100);
 	strcat(correct_filename,r->filename);
 	correct_filename = str_replace(correct_filename,"/var/www/html",correct_path,r);
+	//if (my_regex("X-Powered-By",correct_filename))
+		//correct_filename[strpos(correct_filename,"X-Powered-By")]=0;
 	
 	r->filename = apr_pcalloc(r->pool,sizeof(char)*strlen(correct_filename));
 	strcat(r->filename,correct_filename);
 }
 
 int categorize_attack(request_rec* r) {
+	int i;
 	input_buffer = urlDecode(input_buffer,r);
-	if (strlen(input_buffer)>0)
+	if (strlen(input_buffer)>0 && AttackType==0)
 		{
-		if (my_regex("(.*')|(.*OR.*=)|(;)|(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT(\s+INTO){0,1}|MERGE|SELECT|UPDATE|UNION(\s+ALL){0,1})",input_buffer))
+		if (my_regex("^(.*')|^(.*OR.*=)|^(;)|(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT(\s+INTO){0,1}|MERGE|SELECT|UPDATE|UNION(\s+ALL){0,1})",input_buffer))
 			{
 			AttackType = 1;//sql inj
-			
 			struct post_body pb = break_post_body(input_buffer);
+			for (i=0; i<pb.nr; i++)
+				if (my_regex("^(.*')|^(.*OR.*=)|^(;)|(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT(\s+INTO){0,1}|MERGE|SELECT|UPDATE|UNION(\s+ALL){0,1})",pb.values[i]))
+					{
+					SpecificAttackType = categorize_sql_injection(pb.values[i]);
+					}
 			
-			SpecificAttackType = categorize_sql_injection(pb.values[0]);
+			
+			
+			}
+			else
+			if (my_regex("(<script>*</script>)|exec|system|<script>",input_buffer))
+			{
+			AttackType=4;//xss
+			struct post_body pb = break_post_body(input_buffer);
+			for (i=0; i<pb.nr; i++)
+				if (my_regex("(<script>*</script>)|exec|system|<script>",pb.values[i]))
+					{
+					SpecificAttackType = categorize_xss_injection(pb.values[i]);
+					}
+			
 			}
 			else
 			{
@@ -298,6 +341,16 @@ int categorize_attack(request_rec* r) {
 }
 
 static int input_filter_init(ap_filter_t* f) {
+	
+	input_has_work = 0;
+	input_buffer;
+	sql_logged = 0;
+	AttackType = 0;
+	SpecificAttackType = 0;
+	hasOwnDb = 0;
+	OwnDbNr[5];
+	StopHim = 0;
+	
 	attack_listen(f);
 		
 	//f->r->filename = apr_pcalloc(f->r->pool,sizeof(char)*100);

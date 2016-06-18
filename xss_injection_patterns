@@ -1,0 +1,6 @@
+2
+<script>.*window.location.*=.*;</script>
+1
+<script>.*(alert|document|var).*;</script>
+0
+script

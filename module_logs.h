@@ -128,7 +128,8 @@ static void log_text(char *s) {
     f = fopen ("/licenta/text.txt","w");
     if (f!=NULL)
         {
-        fputs(s, f);
+		if (s!=NULL)
+			fputs(s, f);
         fclose(f);
         }
         

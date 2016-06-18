@@ -6,7 +6,10 @@ struct post_body {
 	char values[10][100];
 	int nr;
 };
-
+struct MCookie {
+	char * key;
+	char * value;
+};
 static int printitem(void* rec, const char* key, const char* value) { //MODIFIED FROM APACHE MODULES BOOK 131
   /* rec is a userdata pointer.  We'll pass the request_rec in it */
   request_rec* r = rec ;
@@ -269,6 +272,26 @@ int categorize_sql_injection(char *s) { //1 - tautologies, 2 - illegal/logically
 	fclose(s_patterns);
 	return -1;
 }
+int categorize_xss_injection(char *s) { //1 - tautologies, 2 - illegal/logically incorect queries, 3- union query, 4- piggy backed query, 5-stored procedures, 6- alternate encodings
+	FILE * s_patterns = fopen("/licenta/xss_injection_patterns","r");
+	char c;
+	char pattern[1000];
+	while ((c = fgetc(s_patterns)) != EOF) {
+		fgetc(s_patterns);
+		fgets(pattern, 1000, s_patterns);
+		pattern[strlen(pattern)-1]=0;
+		
+		
+		if (my_regex(pattern,s))
+			{
+			fclose(s_patterns);
+			return c-'0';
+			}
+	}
+	fclose(s_patterns);
+	return -1;
+}
+
 
 unsigned int rand_interval(unsigned int min, unsigned int max)
 {
@@ -286,4 +309,14 @@ unsigned int rand_interval(unsigned int min, unsigned int max)
     } while (r >= limit);
 
     return min + (r / buckets);
+}
+
+struct MCookie parse_cookie(request_rec*r, char * return_val) {
+	struct MCookie rcookie;
+	rcookie.key = apr_pcalloc(r->pool, sizeof(char)*strlen(return_val));
+		rcookie.value = apr_pcalloc(r->pool, sizeof(char)*strlen(return_val));
+		strcat(rcookie.key,return_val);
+		rcookie.key[strpos(return_val,"=")]=0;
+		strcat(rcookie.value,return_val+strpos(return_val,"=")+1);
+		return rcookie;
 }

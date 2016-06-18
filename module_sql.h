@@ -15,8 +15,7 @@ escape_and_add(MYSQL *conn,char * query,char * whattoadd,int comma) {
 
 static void mysql_log(request_rec *r) {
 	
-	if (my_regex("honeyadmin",r->uri))
-		return;
+	
 	
 	MYSQL *conn;
 	MYSQL_RES *res;
@@ -458,4 +457,63 @@ void clonedb(request_rec *r) {
 	hasOwnDb = 1;
 	OwnDbNr[0]=0;
 	sprintf(OwnDbNr,"%d",last_sql_clone_nr);
+}
+
+
+struct MCookie get_last_set_cookie(request_rec* r) {
+	MYSQL *conn;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	
+	char * return_val = NULL;
+	struct MCookie rcookie;
+	rcookie.key=NULL;
+	conn = mysql_init(NULL);
+	/* Connect to database */
+	if (!mysql_real_connect(conn, Module_SQL_server,
+		 Module_SQL_user, Module_SQL_password, Module_SQL_database, 0, NULL, 0)) {
+	  //printf("%s\n", mysql_error(conn));
+	  exit(1);
+	}
+	char query[50000];
+	query[0]=0;
+	int count=0;
+	//SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='89.136.122.93' AND timestamp>'2016-06-09 00:38:55'
+	sprintf(query,"SELECT headers_out FROM  `logs` WHERE headers_out LIKE '%%Set-Cookie%%' AND r_useragent_ip='%s' ORDER BY TIMESTAMP DESC LIMIT 1;",r->useragent_ip);
+	
+	//log_text(query);
+	if (mysql_query(conn, query)) {
+		  //printf("%s\n", mysql_error(conn));
+		  //log_text(mysql_error(conn));
+		  //exit(1);
+		}
+		else
+		{
+		res = mysql_use_result(conn);
+		// output table name 
+		
+		while ((row = mysql_fetch_row(res)) != NULL)
+			{
+			return_val = apr_pcalloc(r->pool, sizeof(char)*strlen(row[0]));
+			strcat(return_val,row[0]);
+			}
+		  //printf("%s \n", row[0]);
+	  
+		// close connection 
+		mysql_free_result(res);
+		}
+	mysql_close(conn);
+	if (return_val!=NULL)
+		{
+		char * temp = apr_pcalloc(r->pool, sizeof(char)*strlen(return_val));
+		strcat(temp,return_val);
+		return_val[0]=0;
+		
+		strcat(return_val,temp+strpos(temp,"Set-Cookie")+12);
+		return_val[strpos(return_val,";")]=0;
+		return parse_cookie(r,return_val);
+		
+		
+		}
+	return rcookie;
 }
