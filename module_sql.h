@@ -1,6 +1,6 @@
 char *Module_SQL_server = "localhost";
 char *Module_SQL_user = "root";
-char *Module_SQL_password = "Dan230793"; /* set me first */
+char *Module_SQL_password = "Honey230793"; /* set me first */
 char *Module_SQL_database = "honeypot";
 
 escape_and_add(MYSQL *conn,char * query,char * whattoadd,int comma) {
@@ -312,7 +312,7 @@ void clonedb(request_rec *r) {
 	}
 	
 	int last_sql_clone_nr;
-	FILE * last_sql = fopen("/licenta/last_sql_clone.txt","r");
+	FILE * last_sql = fopen("/var/www/last_sql_clone.txt","r");
 	fscanf(last_sql,"%d",&last_sql_clone_nr);
 	fclose(last_sql);
 	last_sql_clone_nr++;
@@ -326,7 +326,7 @@ void clonedb(request_rec *r) {
 	  //exit(1);
 	}
 	query[0]=0;
-	sprintf(query + strlen(query),"GRANT ALL PRIVILEGES ON elixir_fashion%d.* To 'elixir_fashion%duser'@'localhost' IDENTIFIED BY 'test%dpass';",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
+	sprintf(query + strlen(query),"GRANT ALL PRIVILEGES ON elixir_fashion%d.* To 'elixir%duser'@'localhost' IDENTIFIED BY 'test%dpass';",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
 	if (mysql_query(conn, query)) {
 	  //printf("%s\n", mysql_error(conn));
 	  log_text(mysql_error(conn));
@@ -334,12 +334,122 @@ void clonedb(request_rec *r) {
 	}
 	
 	query[0]=0;
-	sprintf(query + strlen(query),"mysqldump -h localhost -u root -p'Honey230793' elixir_fashion | mysql -h localhost -u elixir_fashion%duser -p'test%dpass' elixir_fashion%d",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
+	sprintf(query + strlen(query),"mysqldump -h localhost -u root -p'Honey230793' elixir_data | mysql -h localhost -u elixir%duser -p'test%dpass' elixir_fashion%d",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
 	system(query);
 	//log_text(query);
 	
+	mysql_close(conn);
 	
-	last_sql = fopen("/licenta/last_sql_clone.txt","w");
+	
+	query[0]=0;
+	sprintf(query,"elixir_fashion%d",last_sql_clone_nr);
+	conn = mysql_init(NULL);
+	if (!mysql_real_connect(conn, Module_SQL_server,
+		 Module_SQL_user, Module_SQL_password, query, 0, NULL, 0)) {
+	  //printf("%s\n", mysql_error(conn));
+	  exit(1);
+	}
+	
+	
+	query[0]=0;
+	sprintf(query,"DELETE FROM cart ORDER BY RAND() LIMIT %d",rand_interval(8000,9500));
+	mysql_query(conn, query);
+	query[0]=0;
+	sprintf(query,"DELETE FROM cart_products ORDER BY RAND() LIMIT %d",rand_interval(9000,9500));
+	mysql_query(conn, query);
+	query[0]=0;
+	sprintf(query,"DELETE FROM orders ORDER BY RAND() LIMIT %d",rand_interval(9900,9990));
+	mysql_query(conn, query);
+	query[0]=0;
+	sprintf(query,"DELETE FROM products ORDER BY RAND() LIMIT %d",rand_interval(9900,9990));
+	//mysql_query(conn, query);
+	query[0]=0;
+	sprintf(query,"DELETE FROM users ORDER BY RAND() LIMIT %d",rand_interval(8500,9500));
+	mysql_query(conn, query);
+	
+	mysql_close(conn);
+	// COPY_ING the files!
+	query[0]=0;
+	sprintf(query,"mkdir /var/www/html/copy%d",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/add_to_cart.php /var/www/html/copy%d/add_to_cart.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/cart.php /var/www/html/copy%d/cart.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/checkout.php /var/www/html/copy%d/checkout.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/logout.php /var/www/html/copy%d/logout.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/product.php /var/www/html/copy%d/product.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/signup.php /var/www/html/copy%d/signup.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/test.php /var/www/html/copy%d/test.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/test2.php /var/www/html/copy%d/test2.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/index.php /var/www/html/copy%d/index.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/my_account.php /var/www/html/copy%d/my_account.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/remove_from_cart.php /var/www/html/copy%d/remove_from_cart.php",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp /var/www/html/style.css /var/www/html/copy%d/style.css",last_sql_clone_nr);
+	system(query);
+	
+	query[0]=0;
+	sprintf(query,"cp -avr /var/www/html/includes /var/www/html/copy%d/includes",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp -avr /var/www/html/js /var/www/html/copy%d/js",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp -avr /var/www/html/css /var/www/html/copy%d/css",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp -avr /var/www/html/fonts /var/www/html/copy%d/fonts",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp -avr /var/www/html/images /var/www/html/copy%d/images",last_sql_clone_nr);
+	system(query);
+	query[0]=0;
+	sprintf(query,"cp -avr /var/www/html/lib /var/www/html/copy%d/lib",last_sql_clone_nr);
+	system(query);
+	
+	
+	char * db_config_contents;
+	query[0]=0;sprintf(query,"/var/www/html/copy%d/includes/initialize.php",last_sql_clone_nr);
+	read_in_buffer(query,&db_config_contents,r);
+	query[0]=0;sprintf(query,"elixir%duser",last_sql_clone_nr);
+	db_config_contents = str_replace(db_config_contents,"elixir_user",query,r);
+	query[0]=0;sprintf(query,"test%dpass",last_sql_clone_nr);
+	db_config_contents = str_replace(db_config_contents,"elixir_fashion123",query,r);
+	query[0]=0;sprintf(query,"elixir_fashion%d",last_sql_clone_nr);
+	db_config_contents = str_replace(db_config_contents,"elixir_fashion",query,r);
+	//log_text(db_config_contents);
+	
+	query[0]=0;sprintf(query,"/var/www/html/copy%d/includes/initialize.php",last_sql_clone_nr);
+	FILE * db_config = fopen(query,"w");
+	fprintf(db_config,"%s",db_config_contents);
+	fclose(db_config);
+	
+	
+	
+	
+	
+	last_sql = fopen("/var/www/last_sql_clone.txt","w");
 	fprintf(last_sql,"%d\n",last_sql_clone_nr);
 	fclose(last_sql);
 	last_sql = fopen("/var/www/ip_map","a+");
@@ -348,20 +458,4 @@ void clonedb(request_rec *r) {
 	hasOwnDb = 1;
 	OwnDbNr[0]=0;
 	sprintf(OwnDbNr,"%d",last_sql_clone_nr);
-
-	/*
-	/*
-	// send SQL query 
-	if (mysql_query(conn, "show tables")) {
-	  printf("%s\n", mysql_error(conn));
-	  exit(1);
-	}
-	res = mysql_use_result(conn);
-	// output table name 
-	printf("MySQL Tables in mysql database:\n");
-	while ((row = mysql_fetch_row(res)) != NULL)
-	  printf("%s \n", row[0]);
-	// close connection 
-	mysql_free_result(res);*/
-	mysql_close(conn);
 }

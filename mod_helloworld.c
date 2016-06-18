@@ -22,8 +22,8 @@ int hasOwnDb = 0;
 char * OwnDbNr[5];
 int StopHim = 0;
 
-#include "module_helpers.h"
 #include "module_logs.h"
+#include "module_helpers.h"
 #include "module_sql.h"
 
 
@@ -196,6 +196,7 @@ int attack_listen(ap_filter_t* f) {
 	while (fgets(ip_map_line, 100, ip_map) != NULL) {
 		if (strstr(ip_map_line,f->r->useragent_ip)!=NULL)
 			{
+			ip_map_line[strlen(ip_map_line)-1]=0;
 			hasOwnDb=1;
 			OwnDbNr[0]=0;
 			strcat(OwnDbNr,ip_map_line+strlen(f->r->useragent_ip)+1);
@@ -206,6 +207,7 @@ int attack_listen(ap_filter_t* f) {
 	fclose(ip_map);
 	//log_nr(hasOwnDb);
 	//verify_ip(f->r);
+	
 		
 	
 	int ok=0;
@@ -217,7 +219,25 @@ int attack_listen(ap_filter_t* f) {
 		output_has_work = 1;
 		input_buffer = -1;
 		}
+		else
+		{		
+		if (hasOwnDb)
+			changefilepath(f->r);
+		}
+		
 	return 0;
+}
+
+void changefilepath(request_rec* r) {
+	char correct_path[100];
+	correct_path[0]=0;
+	sprintf(correct_path,"/var/www/html/copy%s",OwnDbNr);
+	char * correct_filename = apr_pcalloc(r->pool,sizeof(char)*100);
+	strcat(correct_filename,r->filename);
+	correct_filename = str_replace(correct_filename,"/var/www/html",correct_path,r);
+	
+	r->filename = apr_pcalloc(r->pool,sizeof(char)*strlen(correct_filename));
+	strcat(r->filename,correct_filename);
 }
 
 int categorize_attack(request_rec* r) {
@@ -229,11 +249,8 @@ int categorize_attack(request_rec* r) {
 			AttackType = 1;//sql inj
 			
 			struct post_body pb = break_post_body(input_buffer);
+			
 			SpecificAttackType = categorize_sql_injection(pb.values[0]);
-			if (SpecificAttackType>0 && hasOwnDb==0)
-				{
-				clonedb(r);
-				}
 			}
 			else
 			{
@@ -271,8 +288,12 @@ int categorize_attack(request_rec* r) {
 	if (AttackType>0)
 		{
 		verify_ip(r);
+		if (SpecificAttackType>0 && hasOwnDb==0)
+			clonedb(r);
 		}
 	
+	if (hasOwnDb)
+		changefilepath(r);		
 				
 }
 

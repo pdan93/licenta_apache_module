@@ -1,6 +1,6 @@
 
 FILE * complete_file_log = -1;
-
+/*
 static void complete_log_request(request_rec *r) {
 	
     complete_file_log = fopen ("/licenta/request.txt","w");
@@ -63,9 +63,7 @@ static void complete_log_request(request_rec *r) {
 			fprintf(complete_file_log, "\tConnection ClientAddr id_addr: %s\n",ip_addr);
 			}
 		
-		/*char * ip_addr;
-		apr_sockaddr_ip_get(&ip_addr, client_addr);
-			fprintf(complete_file_log, "\tConnection ClientAddr id_addr: %s\n",ip_addr);*/
+		
 			
 			//apr_uri_t parsed_uri = r->parsed_uri;
 			//fprintf(complete_file_log, "\tRequest ParsedURI scheme: %s\n",parsed_uri->user);
@@ -104,7 +102,7 @@ static void complete_log_request(request_rec *r) {
         
         }
         
-}
+}*/
 
 
 static void log_bucket(apr_bucket *b) {
