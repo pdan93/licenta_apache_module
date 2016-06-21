@@ -1,0 +1,4 @@
+#!/bin/bash
+yacc -d sql_parser.y
+lex sql_parser.l
+gcc -g lex.yy.c  y.tab.c -o sql_parser

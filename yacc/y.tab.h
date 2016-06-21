@@ -45,11 +45,41 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    sel = 258
+    TEXT = 258,
+    LOGICAL = 259,
+    END = 260,
+    ALT_ENCODING = 261,
+    PROCEDURE = 262,
+    COMPARATOR = 263,
+    UNION = 264,
+    WHERE = 265,
+    N_INSTRUCTION = 266,
+    D_INSTRUCTION = 267,
+    FOLLOWER = 268,
+    APOSTROPHE = 269,
+    SEMICOLON = 270,
+    QUOTATION = 271,
+    STRING = 272,
+    NUMBER = 273
   };
 #endif
 /* Tokens.  */
-#define sel 258
+#define TEXT 258
+#define LOGICAL 259
+#define END 260
+#define ALT_ENCODING 261
+#define PROCEDURE 262
+#define COMPARATOR 263
+#define UNION 264
+#define WHERE 265
+#define N_INSTRUCTION 266
+#define D_INSTRUCTION 267
+#define FOLLOWER 268
+#define APOSTROPHE 269
+#define SEMICOLON 270
+#define QUOTATION 271
+#define STRING 272
+#define NUMBER 273
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

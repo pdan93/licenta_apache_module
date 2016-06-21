@@ -50,9 +50,6 @@ static int helloworld_handler(request_rec *r) {
     return OK;
 }
 
-
-
-
 static int output_filter_init(ap_filter_t* f) {
 	
 	if (output_has_work==1)
@@ -110,9 +107,9 @@ static int output_filter(ap_filter_t* f, apr_bucket_brigade* bb_in) {
 				if (AttackType==1)//sql inj
 					{
 					
-					if (SpecificAttackType>2)
-						write_brigade(bb_out,r,"HTTP/1.1 500 Internal Server Error");
-						else
+					//if (SpecificAttackType>2)
+					//	write_brigade(bb_out,r,"HTTP/1.1 500 Internal Server Error");
+					//	else
 						write_brigade(bb_out,r,buf); 
 					}
 					else
@@ -213,8 +210,11 @@ int attack_listen(ap_filter_t* f) {
 		
 	
 	int ok=0;
-	if (my_regex("(POST|PUT|DELETE)",f->r->method))
+	if (my_regex("(POST|PUT)",f->r->method))
 		ok=1;
+	
+	if (my_regex("GET",f->r->method))
+		check_get_attacks(f->r);
 	
 	if (AttackType==0)
 		{
@@ -230,11 +230,30 @@ int attack_listen(ap_filter_t* f) {
 				if (!my_regex(cookie_val,headers_in)) //we have a changed cookie
 					{
 					AttackType = 3;
-					SpecificAttackType = 1;
+					SpecificAttackType = 2;
 					ok=1;
 					}
 				}
 			}
+		}
+	if (AttackType==0)
+		{
+		int count  = get_last_requests(f->r);
+		if (count>15)
+			{
+			AttackType = 8;
+			if (count>50)
+				SpecificAttackType = 2;
+				else
+				SpecificAttackType = 1;
+			}
+		}
+	
+	if (AttackType>0)
+		{
+		verify_ip(f->r);
+		if (SpecificAttackType>1 && hasOwnDb==0)
+			clonedb(f->r);
 		}
 	if (ok==1)
 		{
@@ -249,6 +268,57 @@ int attack_listen(ap_filter_t* f) {
 		}
 		
 	return 0;
+}
+
+void check_get_attacks(request_rec* r) {
+	log_text(r->args);
+	if (r->args!=NULL)
+		{
+		if (strlen(r->args)>256)
+			{
+			AttackType = 5; //BUFFER OVERFLOW BASIC ATTACK
+			SpecificAttackType = 1;
+			}
+			else 
+		if (my_regex("(\.\./)|(\./)",r->args) || my_regex("(\.\./)|(\./)",r->unparsed_uri))
+			{
+			AttackType = 6; //Canonicalization
+			SpecificAttackType = 2;
+			}
+			else 
+		if (my_regex("(/bin/)|(%0a)|(exec)|(\n)|(0x)|(\[.*\])",r->args))
+			{
+			AttackType = 7; //Command execution
+			SpecificAttackType = 2;
+			}
+		if (AttackType==0)
+			{
+			int i;
+			char * args = urlDecode(r->args,r);
+			if (my_regex("^(.*')|^(.*OR.*=)|^(;)|(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT(\s+INTO){0,1}|MERGE|SELECT|UPDATE|UNION(\s+ALL){0,1})",args))
+				{
+				AttackType = 1;//sql inj
+				struct post_body pb = break_post_body(args);
+				for (i=0; i<pb.nr; i++)
+					if (my_regex("^(.*')|^(.*OR.*=)|^(;)|(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT(\s+INTO){0,1}|MERGE|SELECT|UPDATE|UNION(\s+ALL){0,1})",pb.values[i]))
+						{
+						SpecificAttackType = categorize_sql_injection(pb.values[i]);
+						}
+				}
+				else
+			if (my_regex("(<script>*</script>)|exec|system|<script>",args))
+				{
+				AttackType=4;//xss
+				struct post_body pb = break_post_body(args);
+				for (i=0; i<pb.nr; i++)
+					if (my_regex("(<script>*</script>)|exec|system|<script>",pb.values[i]))
+						{
+						SpecificAttackType = categorize_xss_injection(pb.values[i]);
+						}
+				
+				}	
+			}
+		}
 }
 
 void changefilepath(request_rec* r) {
@@ -311,8 +381,8 @@ int categorize_attack(request_rec* r) {
 			if (ok_user_email==1 || ok_pass==1)
 				{
 				int count = get_last_guessings(r);
-				log_nr(count);
-				if (count>2)
+				//log_nr(count);
+				if (count>100)
 					{
 					AttackType = 2;//brute force guessing
 					if (ok_user_email==1 && ok_pass==1)
@@ -331,7 +401,7 @@ int categorize_attack(request_rec* r) {
 	if (AttackType>0)
 		{
 		verify_ip(r);
-		if (SpecificAttackType>0 && hasOwnDb==0)
+		if (SpecificAttackType>1 && hasOwnDb==0)
 			clonedb(r);
 		}
 	
@@ -407,7 +477,7 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 static void helloworld_hooks(apr_pool_t *pool) {
     //ap_hook_handler(helloworld_handler, NULL, NULL, APR_HOOK_LAST);ap_hook_translate_name
 	//ap_register_output_filter("helloworld", last_filter, NULL, AP_FTYPE_RESOURCE) ;
-	//ap_hook_translate_name(translate_name_handler, NULL, NULL, APR_HOOK_MIDDLE);
+	//ap_hook_pre_config(pre_config_handler, NULL, NULL, APR_HOOK_MIDDLE);
 	//ap_hook_post_read_request(post_config_handler, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("helloworld", output_filter, output_filter_init, AP_FTYPE_RESOURCE);
 	ap_register_input_filter("elixir_output_filter", input_filter, input_filter_init, AP_FTYPE_CONTENT_SET);//AP_FTYPE_CONNECTION);

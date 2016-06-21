@@ -6,20 +6,28 @@ extern FILE* yyin;
 %}
 
 
-%start injections
-%token TEXT LOGICAL COMPARATOR N_INSTRUCTION D_INSTRUCTION FOLLOWER APOSTROPHE SEMICOLON QUOTATION STRING NUMBER
+%start injection
+%token  TEXT LOGICAL END ALT_ENCODING PROCEDURE COMPARATOR UNION WHERE N_INSTRUCTION D_INSTRUCTION FOLLOWER APOSTROPHE SEMICOLON QUOTATION STRING NUMBER
 
 %%
 
-injections : injection
-		| injection injections
+
+injection : tautology END {printf("tautology\n");}
+		| illegal END {printf("illegal\n");}
+		| union END {printf("union\n");}
+		| piggy_backed END {printf("piggy_backed\n");}
+		| stored_procedure END {printf("stored_procedure\n");}
+		| alternate_encoding END {printf("alternate_encoding\n");}
 		;
-injection : tautology
-		| illegal
-		| union
-		| piggy_backed
-		| stored_procedure
-		| alternate_encoding
+		
+instruction :  N_INSTRUCTION FOLLOWER TEXT
+		| N_INSTRUCTION FOLLOWER TEXT FOLLOWER
+		| N_INSTRUCTION TEXT FOLLOWER
+		| N_INSTRUCTION TEXT FOLLOWER TEXT
+		| N_INSTRUCTION TEXT FOLLOWER TEXT FOLLOWER
+		| N_INSTRUCTION FOLLOWER TEXT where_clause
+		| D_INSTRUCTION FOLLOWER TEXT
+		| D_INSTRUCTION FOLLOWER TEXT FOLLOWER
 		;
 		
 tautology : TEXT APOSTROPHE
@@ -27,24 +35,52 @@ tautology : TEXT APOSTROPHE
 		;
 illegal : APOSTROPHE APOSTROPHE
 		| QUOTATION QUOTATION
+		| TEXT QUOTATION instruction
+		| TEXT APOSTROPHE instruction
+		| instruction
 		;
-union : TEXT APOSTROPHE
-		| TEXT APOSTROPHE LOGICAL expression
+union : TEXT APOSTROPHE union_select
+		| union_select
 		;
-piggy_backed : TEXT APOSTROPHE
-		| TEXT APOSTROPHE LOGICAL expression
+union_select : UNION N_INSTRUCTION TEXT FOLLOWER TEXT WHERE TEXT
+		| UNION N_INSTRUCTION TEXT FOLLOWER TEXT WHERE unfinished_expression
 		;
-stored_procedure : TEXT APOSTROPHE
-		| TEXT APOSTROPHE LOGICAL expression
+piggy_backed : TEXT APOSTROPHE SEMICOLON instruction
+		| APOSTROPHE SEMICOLON instruction
 		;
-alternate_encoding : TEXT APOSTROPHE
-		| TEXT APOSTROPHE LOGICAL expression
+stored_procedure : TEXT APOSTROPHE SEMICOLON procedure_exp
+		| APOSTROPHE SEMICOLON procedure_exp
+		| TEXT APOSTROPHE SEMICOLON procedure_exp '-' '-'
+		| APOSTROPHE SEMICOLON procedure_exp '-' '-'
+		;
+alternate_encoding : TEXT APOSTROPHE SEMICOLON alt_encoding_exp
+		| APOSTROPHE SEMICOLON alt_encoding_exp
 		;
 		
+alt_encoding_exp : ALT_ENCODING
+		| ALT_ENCODING SEMICOLON
+		| ALT_ENCODING '-' '-'
+		| ALT_ENCODING SEMICOLON '-' '-'
+		| ALT_ENCODING '-' '-' SEMICOLON
+		;
+		
+		
+procedure_exp : PROCEDURE SEMICOLON 
+		| N_INSTRUCTION SEMICOLON
+		| D_INSTRUCTION SEMICOLON
+		;
 expression : STRING COMPARATOR STRING
 		| NUMBER COMPARATOR NUMBER
+		| APOSTROPHE TEXT APOSTROPHE COMPARATOR APOSTROPHE TEXT APOSTROPHE
 		;
-
+unfinished_expression : APOSTROPHE TEXT APOSTROPHE COMPARATOR APOSTROPHE TEXT
+		;
+		
+where_clause : WHERE expression
+		| WHERE unfinished_expression
+		| WHERE expression LOGICAL expression
+		| WHERE expression LOGICAL unfinished_expression
+		;
 		
 %%                     /* C code */
 
