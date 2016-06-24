@@ -283,11 +283,11 @@ int verify_ip(request_rec *r) {
 	  //printf("%s\n", mysql_error(conn));
 	  exit(1);
 	}
-	char query[50000];
+	char * query = apr_pcalloc(r->pool,sizeof(char)*1000);
 	query[0]=0;
 	int count=0;
 	//SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='89.136.122.93' AND timestamp>'2016-06-09 00:38:55'
-	strcat(query,"SELECT COUNT(*) as 'count' FROM `ips` WHERE ip='");
+	strcat(query,"SELECT COUNT(*) as 'counnt' FROM `ips` WHERE ip='");
 	sprintf(query + strlen(query),"%s'",r->useragent_ip);
 	
 	
@@ -519,13 +519,12 @@ struct MCookie get_last_set_cookie(request_rec* r) {
 	struct MCookie rcookie;
 	rcookie.key=NULL;
 	conn = mysql_init(NULL);
-	/* Connect to database */
 	if (!mysql_real_connect(conn, Module_SQL_server,
 		 Module_SQL_user, Module_SQL_password, Module_SQL_database, 0, NULL, 0)) {
 	  //printf("%s\n", mysql_error(conn));
 	  exit(1);
 	}
-	char query[50000];
+	char query[1000];
 	query[0]=0;
 	int count=0;
 	//SELECT COUNT(*) as 'count' FROM `logs` WHERE (user_post!='' OR pass_post!='') AND r_useragent_ip='89.136.122.93' AND timestamp>'2016-06-09 00:38:55'
@@ -556,11 +555,13 @@ struct MCookie get_last_set_cookie(request_rec* r) {
 	if (return_val!=NULL)
 		{
 		char * temp = apr_pcalloc(r->pool, sizeof(char)*strlen(return_val));
+		log_nr(strlen(return_val));
 		strcat(temp,return_val);
 		return_val[0]=0;
 		
 		strcat(return_val,temp+strpos(temp,"Set-Cookie")+12);
-		return_val[strpos(return_val,";")]=0;
+		if (strpos(return_val,";"))
+			return_val[strpos(return_val,";")]=0;
 		return parse_cookie(r,return_val);
 		
 		

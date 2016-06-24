@@ -49,10 +49,7 @@
 				<div class="col-md-6">
 					<div class="header_top_right text-right">
 						<ul>
-							
-								<li><a href="my_account.php">Account</a></li>
-								<li><a href="logout.php">Logout</a></li>
-								
+							<li><a href="signup.php">Register / Login</a></li>
 
 							<li class="searchbox">
 								<input type="search" placeholder="Search......" name="search" class="searchbox-input" onkeyup="buttonUp();" required>
@@ -464,4 +461,240 @@ Boba Fett						</div>
 							 data-end="8700"
 							 data-endspeed="300"
 						>
-							<a class="s
+							<a class="slide_btn" href="product.php?id=4"
+							   style="z-index: 2; max-width: auto; max-height: auto; white-space: nowrap;font-size:16px; color:#fff;border: 2px solid #ffffff;line-height:2;padding: 10px 30px;">SHOP
+								NOW</a>
+						</div>
+
+
+					</li>
+										<!-- SLIDE-1  -->
+					<li data-transition="random" data-slotamount="7" data-masterspeed="300" data-saveperformance="off">
+						<!-- MAIN IMAGE -->
+						<img src="images/slider/slider_bg-2.jpg" alt="mainbanner-31" data-bgposition="center top"
+							 data-bgfit="cover" data-bgrepeat="no-repeat">
+						<!-- LAYERS -->
+						<!-- LAYER NR. 1 -->
+						<div class="tp-caption banner1 tp-fade tp-resizeme"
+							 data-x="910"
+							 data-y="20"
+							 data-speed="300"
+							 data-start="500"
+							 data-easing="Power3.easeInOut"
+							 data-splitin="none"
+							 data-splitout="none"
+							 data-elementdelay="0"
+							 data-endelementdelay="0"
+							 data-end="8700"
+							 data-endspeed="300"
+							 style="z-index: 2; max-width: auto; max-height: auto; white-space: nowrap;"><img src="
+images/product/Image00005.png" alt="">
+						</div>
+
+						<!-- LAYER NR. 2 -->
+						<div class="tp-caption banner12 tp-fade tp-resizeme"
+							 data-x="385"
+							 data-y="145"
+							 data-speed="300"
+							 data-start="800"
+							 data-easing="Power3.easeInOut"
+							 data-splitin="none"
+							 data-splitout="none"
+							 data-elementdelay="0"
+							 data-endelementdelay="0"
+							 data-end="8700"
+							 data-endspeed="300"
+							 style="z-index: 7;font-size:72px; font-family:nexa_blackregular;font-weight:700;color:#3a4b60;max-width: auto; max-height: auto; white-space: nowrap;">
+							star wars shirt						</div>
+
+						<!-- LAYER NR. 3 -->
+						<div class="tp-caption banner13 tp-fade tp-resizeme"
+							 data-x="385"
+							 data-y="190"
+							 data-speed="300"
+							 data-start="1100"
+							 data-easing="Power3.easeInOut"
+							 data-splitin="none"
+							 data-splitout="none"
+							 data-elementdelay="0"
+							 data-endelementdelay="0"
+							 data-end="8700"
+							 data-endspeed="300"
+							 style="z-index: 4; max-width: auto; max-height: auto; white-space: nowrap;font-size:24px;line-height:26px;font-family:Roboto;font-weight:100; color:#ffffff;letter-spacing:8px;">
+							who's your daddy						</div>
+
+						<!-- LAYER NR. 4.1 -->
+						<div class="tp-caption banner21 tp-fade tp-resizeme"
+							 data-x="385"
+							 data-y="273"
+							 data-speed="300"
+							 data-start="800"
+							 data-easing="Power3.easeInOut"
+							 data-splitin="none"
+							 data-splitout="none"
+							 data-elementdelay="0"
+							 data-endelementdelay="0"
+							 data-end="8700"
+							 data-endspeed="300"
+							 style="z-index: 4; max-width: auto; max-height: auto; white-space: nowrap;font-size:20px;line-height:2;font-family:nexa_bookregular;color:#ffffff;">
+							100% combed cotton<br />
+							Color: 100% combed cotton<br />
+							Fit: 100% combed cotton<br />
+						</div>
+
+						<!-- LAYER NR. 4.7 -->
+						<div class="tp-caption banner2 tp-fade tp-resizeme"
+							 data-x="385"
+							 data-y="530"
+							 data-speed="1800"
+							 data-start="500"
+							 data-easing="Power3.easeInOut"
+							 data-splitin="none"
+							 data-splitout="none"
+							 data-elementdelay="0"
+							 data-endelementdelay="0"
+							 data-end="8700"
+							 data-endspeed="300"
+						>
+							<a class="slide_btn" href="product.php?id=5"
+							   style="z-index: 2; max-width: auto; max-height: auto; white-space: nowrap;font-size:16px; color:#fff;border: 2px solid #ffffff;line-height:2;padding: 10px 30px;">SHOP
+								NOW</a>
+						</div>
+
+
+					</li>
+								</ul>
+		</div>
+	</div>
+	<!-- Slider-Section-End  -->
+	<!-- Product-Section-Strat  -->
+	<section class="product_area section-padding">
+						<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00003.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=3">Yoda</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00004.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=4">Simple</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00005.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=5">star wars shirt</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00006.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=6">Join the empire</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00007.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=7">Paris</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00008.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=8">cafe racer</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00009.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=9">dream</a></h1>
+						</div>
+					</div>
+				</div>
+							<div class="padding_right main_single_product">
+					<div class="single_product">
+						<div class="product_img">
+							<img src="images/product/Image00010.png" alt="DARK BLUE IMAGE"/>
+						</div>
+						<div class="product_text dark_product">
+							<h1><a href="product.php?id=10">darth vader</a></h1>
+						</div>
+					</div>
+				</div>
+				</section>
+	<!-- Product-Section-End  -->
+
+
+<!-- Footer-Section-Start -->
+<footer>
+
+
+	<div class="footer_bottom footer-padding">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-xs-12">
+					<div class="copyright">
+						<p>Copyright 2016 Elixir Fashion All rights reserved</p>
+					</div>
+				</div>
+				<div class="col-sm-6 col-xs-12">
+					<div class="copyright_icon text-right">
+						<a href="#"><img src="images/footer/paypal-1.png" alt="" /></a>
+						<a href="#"><img src="images/footer/paypal-2.png" alt="" /></a>
+						<a href="#"><img src="images/footer/paypal-3.png" alt="" /></a>
+						<a href="#"><img src="images/footer/paypal-4.png" alt="" /></a>
+						<a href="#"><img src="images/footer/paypal-5.png" alt="" /></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<!-- Footer-Section-End -->
+<!-- All js Files Here -->
+<!-- jquery-1.11.3 -->
+<script src="js/jquery-1.11.3.min.js"></script>
+<!-- bootstrap js -->
+<script src="js/bootstrap.min.js"></script>
+<!-- revolution js -->
+<script type="text/javascript" src="lib/rs-plugin/js/jquery.themepunch.tools.min.js"></script>
+<script type="text/javascript" src="lib/rs-plugin/js/jquery.themepunch.revolution.min.js"></script>
+<script src="lib/rs-plugin/rs.home.js"></script>
+<!-- search-box js -->
+<script src="js/search-box.js"></script>
+<!-- scrollUp js -->
+<script src="js/jquery.scrollUp.js"></script>
+<!-- mobilemenu js -->
+<script src="js/jquery.meanmenu.js"></script>
+<!-- main js -->
+<script src="js/main.js"></script>
+</body>
+</html>

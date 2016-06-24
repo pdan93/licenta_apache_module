@@ -239,14 +239,21 @@ int attack_listen(ap_filter_t* f) {
 	if (AttackType==0)
 		{
 		int count  = get_last_requests(f->r);
-		if (count>15)
+		//in last 5 minutes
+		if (count>100)
 			{
 			AttackType = 8;
-			if (count>50)
+			SpecificAttackType = 1;
+			/*if (count>500)
 				SpecificAttackType = 2;
-				else
-				SpecificAttackType = 1;
+			if (count>1000)
+				SpecificAttackType = 3;*/
 			}
+		/*int count2 = get_last_profiling_requests(f->r);
+		if (count2*100/count>70)
+			{
+			SpecificAttackType = 4;//profiling
+			}*/
 		}
 	
 	if (AttackType>0)
@@ -280,7 +287,7 @@ void check_get_attacks(request_rec* r) {
 			SpecificAttackType = 1;
 			}
 			else 
-		if (my_regex("(\.\./)|(\./)",r->args) || my_regex("(\.\./)|(\./)",r->unparsed_uri))
+		if (my_regex("(\.\./)",r->args) || my_regex("(\.\./)",r->uri))
 			{
 			AttackType = 6; //Canonicalization
 			SpecificAttackType = 2;
