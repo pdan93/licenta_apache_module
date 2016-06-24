@@ -8,3 +8,5 @@ Pdf of papers is here with the name honeymod-apache-honeypot.pdf
 
 Address of testing server is 
 http://46.101.111.249/
+
+presentaiton also at https://docs.google.com/presentation/d/1LmPxTPnsOkmjOy9OOlo9V-3Lkmz8oa55Wfw8MZ_xI-c/edit#slide=id.p3
