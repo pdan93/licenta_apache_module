@@ -3,6 +3,19 @@
 #include <string.h>
 #include <regex.h>
 
+int my_regex(char * b1, char * b2) {
+	regex_t regex;
+	int reti;
+	reti = regcomp(&regex, b1, REG_EXTENDED);
+	reti = regexec(&regex, b2, 0, NULL, 0);
+	if (!reti)
+		return 1;
+		else if (reti == REG_NOMATCH) 
+		return 0;
+		else
+		return 0;
+}
+
 int main() {
 	
 	
@@ -12,17 +25,7 @@ int main() {
 	char ss[1000];
 	regmatch_t matches[10];
 	scanf("%s",ss);
-	reti = regcomp(&regex, ss, REG_EXTENDED);
-	reti = regexec(&regex, "\.\./", 10, matches, 0);
-	if (!reti)
-		printf("ok\n");
-		else if (reti == REG_NOMATCH) 
-		printf("not ok\n");	
-		else
-		printf("regex failed\n");
-	printf("%d\n",matches[0].rm_so);
-	printf("%d\n",matches[0].rm_eo);
-	printf("%d\n",matches[1].rm_so);
+	printf("%d\n",my_regex("([.]{2}/)",ss));
 
 	return 1;
 }

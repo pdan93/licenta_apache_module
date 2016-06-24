@@ -218,7 +218,7 @@ int attack_listen(ap_filter_t* f) {
 	
 	if (AttackType==0)
 		{
-		struct MCookie setcookie = get_last_set_cookie(f->r);
+		/*struct MCookie setcookie = get_last_set_cookie(f->r);
 		if (setcookie.key!=NULL)
 			{
 			char headers_in[10000]; 
@@ -234,7 +234,7 @@ int attack_listen(ap_filter_t* f) {
 					ok=1;
 					}
 				}
-			}
+			}*/
 		}
 	if (AttackType==0)
 		{
@@ -287,13 +287,13 @@ void check_get_attacks(request_rec* r) {
 			SpecificAttackType = 1;
 			}
 			else 
-		if (my_regex("(\.\./)",r->args) || my_regex("(\.\./)",r->uri))
+		if (my_regex("([.]{2}/)",r->args) || my_regex("([.]{2}/)",r->uri))
 			{
 			AttackType = 6; //Canonicalization
 			SpecificAttackType = 2;
 			}
 			else 
-		if (my_regex("(/bin/)|(%0a)|(exec)|(\n)|(0x)|(\[.*\])",r->args))
+		if (my_regex("(/bin/)|(%0a)|(exec)|(\n)|(0x)",r->args))
 			{
 			AttackType = 7; //Command execution
 			SpecificAttackType = 2;
@@ -389,7 +389,7 @@ int categorize_attack(request_rec* r) {
 				{
 				int count = get_last_guessings(r);
 				//log_nr(count);
-				if (count>100)
+				if (count>10)
 					{
 					AttackType = 2;//brute force guessing
 					if (ok_user_email==1 && ok_pass==1)
