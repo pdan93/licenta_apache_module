@@ -21,6 +21,7 @@ int SpecificAttackType = 0;
 int hasOwnDb = 0;
 char * OwnDbNr[5];
 int StopHim = 0;
+int inclone=0;
 
 #include "module_logs.h"
 #include "module_helpers.h"
@@ -239,6 +240,7 @@ int attack_listen(ap_filter_t* f) {
 	if (AttackType==0)
 		{
 		int count  = get_last_requests(f->r);
+		count=0;
 		//in last 5 minutes
 		if (count>100)
 			{
@@ -259,8 +261,8 @@ int attack_listen(ap_filter_t* f) {
 	if (AttackType>0)
 		{
 		verify_ip(f->r);
-		if (SpecificAttackType>1 && hasOwnDb==0)
-			clonedb(f->r);
+		//if (SpecificAttackType>1 && hasOwnDb==0)
+			//clonedb(f->r);
 		}
 	if (ok==1)
 		{
@@ -459,12 +461,15 @@ int input_filter(ap_filter_t* f, apr_bucket_brigade *bb, ap_input_mode_t mode, a
 			char* buf ;
 			size_t bytes ;
 			if ( APR_BUCKET_IS_EOS(b) ) {
-				categorize_attack(f->r);
-				input_has_work=-1;
-				if (StopHim==1)
+				if (input_has_work==1)
 					{
-					mysql_log(f->r);
-					exit(0);
+					input_has_work=-1;
+					categorize_attack(f->r);
+					if (StopHim==1)
+						{
+						mysql_log(f->r);
+						exit(0);
+						}	
 					}
 				}
 				else 

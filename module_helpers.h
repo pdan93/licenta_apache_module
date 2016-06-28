@@ -38,7 +38,8 @@ void read_in_buffer(char * filepath, char ** buffer, request_rec * r ) {
 
   // copy the file into the buffer:
   size_t result = fread (*buffer,1,lSize,content_file2);
-  if (result != lSize) {fputs ("Reading error",stderr); exit (3);}	  
+  if (result != lSize) {fputs ("Reading error",stderr); exit (3);}	 
+fclose(content_file2);  
 }
 int strpos(char *haystack, char *needle)
 {
@@ -77,7 +78,7 @@ char *str_replace(char *orig, char *rep, char *with, request_rec * r) {
     //    tmp points to the end of the result string
     //    ins points to the next occurrence of rep in orig
     //    orig points to the remainder of orig after "end of rep"
-    tmp = result = apr_pcalloc(r->pool,strlen(orig) + (len_with - len_rep) * count + 1);
+    tmp = result = apr_pcalloc(r->pool,2*(strlen(orig) + (len_with - len_rep) * count + 1));
 
     if (!result)
         return NULL;

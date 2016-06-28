@@ -368,17 +368,19 @@ void clonedb(request_rec *r) {
 	
 	char query[50000];
 	query[0]=0;
-	sprintf(query + strlen(query),"CREATE DATABASE elixir_fashion%d",last_sql_clone_nr);
+	sprintf(query + strlen(query),"CREATE DATABASE elixir_fashion%d;",last_sql_clone_nr);
+	inclone++;
+	log_nr2(inclone);
 	if (mysql_query(conn, query)) {
 	  //printf("%s\n", mysql_error(conn));
-	  log_text(mysql_error(conn));
+	  //log_text(query);
 	  //exit(1);
 	}
 	query[0]=0;
 	sprintf(query + strlen(query),"GRANT ALL PRIVILEGES ON elixir_fashion%d.* To 'elixir%duser'@'localhost' IDENTIFIED BY 'test%dpass';",last_sql_clone_nr,last_sql_clone_nr,last_sql_clone_nr);
 	if (mysql_query(conn, query)) {
 	  //printf("%s\n", mysql_error(conn));
-	  log_text(mysql_error(conn));
+	  //log_text(mysql_error(conn));
 	  //exit(1);
 	}
 	
@@ -478,22 +480,6 @@ void clonedb(request_rec *r) {
 	system(query);
 	
 	
-	char * db_config_contents;
-	query[0]=0;sprintf(query,"/var/www/html/copy%d/includes/initialize.php",last_sql_clone_nr);
-	read_in_buffer(query,&db_config_contents,r);
-	query[0]=0;sprintf(query,"elixir%duser",last_sql_clone_nr);
-	db_config_contents = str_replace(db_config_contents,"elixir_user",query,r);
-	query[0]=0;sprintf(query,"test%dpass",last_sql_clone_nr);
-	db_config_contents = str_replace(db_config_contents,"elixir_fashion123",query,r);
-	query[0]=0;sprintf(query,"elixir_fashion%d",last_sql_clone_nr);
-	db_config_contents = str_replace(db_config_contents,"elixir_fashion",query,r);
-	//log_text(db_config_contents);
-	
-	query[0]=0;sprintf(query,"/var/www/html/copy%d/includes/initialize.php",last_sql_clone_nr);
-	FILE * db_config = fopen(query,"w");
-	fprintf(db_config,"%s",db_config_contents);
-	fclose(db_config);
-	
 	
 	
 	
@@ -507,6 +493,26 @@ void clonedb(request_rec *r) {
 	hasOwnDb = 1;
 	OwnDbNr[0]=0;
 	sprintf(OwnDbNr,"%d",last_sql_clone_nr);
+	
+	
+	
+	char * db_config_contents;
+	query[0]=0;sprintf(query,"/var/www/html/copy%d/includes/initialize.php",last_sql_clone_nr);
+	read_in_buffer(query,&db_config_contents,r);
+	query[0]=0;sprintf(query,"elixir%duser",last_sql_clone_nr);
+	db_config_contents = str_replace(db_config_contents,"elixir_user",query,r);
+	query[0]=0;sprintf(query,"test%dpass",last_sql_clone_nr);
+	db_config_contents = str_replace(db_config_contents,"elixir_fashion123",query,r);
+	query[0]=0;sprintf(query,"elixir_fashion%d",last_sql_clone_nr);
+	db_config_contents = str_replace(db_config_contents,"elixir_fashion",query,r);
+	log_text2(db_config_contents);
+	
+	query[0]=0;sprintf(query,"/var/www/html/copy%d/includes/initialize.php",last_sql_clone_nr);
+	FILE * db_config = fopen(query,"w");
+	fprintf(db_config,"%s",db_config_contents);
+	fclose(db_config);
+	
+	
 }
 
 
